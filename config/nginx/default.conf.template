@@ -1,0 +1,36 @@
+# Upstream for Gunicorn
+upstream gunicorn_app {
+    server unix:/home/aymen/PycharmProjects/myapp/educa/educa.sock;
+}
+
+server {
+    listen       80;
+    server_name  127.0.0.1;
+    
+}
+
+server {
+    listen       443 ssl;
+    ssl_certificate      /myapp/ssl/educa.crt;
+    ssl_certificate_key  /myapp/ssl/educa.key;
+    server_name  172.20.10.4;
+    error_log    /var/log/nginx/educa_error.log warn;
+    access_log   /var/log/nginx/educa_access.log main;
+
+    location / {
+        proxy_pass         http://gunicorn_app;
+        proxy_set_header   Host $host;
+        proxy_set_header   X-Real-IP $remote_addr;
+        proxy_set_header   X-Forwarded-For $proxy_add_x_forwarded_for;
+        proxy_set_header   X-Forwarded-Proto $scheme;
+    }
+
+    location /static/ {
+        alias /home/aymen/PycharmProjects/myapp/educa/static/;
+    }
+
+    location /media/ {
+        alias /home/aymen/PycharmProjects/myapp/educa/media/;
+    }
+}
+
